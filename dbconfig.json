@@ -1,0 +1,8 @@
+
+{
+    "user": "postgres",
+    "host": "localhost",
+    "database": "deepview",
+    "password": "fred",
+    "port": 5432
+}
