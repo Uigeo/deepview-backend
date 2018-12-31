@@ -3,6 +3,6 @@
     "user": "postgres",
     "host": "localhost",
     "database": "deepview",
-    "password": "fred",
+    "password": "deep1008",
     "port": 5432
 }
