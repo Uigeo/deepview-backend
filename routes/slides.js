@@ -59,18 +59,26 @@ router.get('/chart/:type', (req, res, next)=>{
     SPD : "SELECT diagnosis, count(slideid) FROM slides GROUP BY diagnosis ORDER BY diagnosis",
     SPH : "SELECT hospital as name, count(slideid)::integer as value FROM slides GROUP BY hospital ORDER BY hospital",
     SPDS : `SELECT * FROM crosstab ( 
-      'SELECT EXTRACT(year from upload) as year , diagnosis, count(slideid) AS count
+      'SELECT diagnosis, hospital ,count(slideid) AS count
       FROM slides
-      GROUP BY EXTRACT(year from upload), diagnosis
+      GROUP BY diagnosis, hospital
        ORDER BY 1, 2'
-       ) as ct("year" double precision, "1" bigint, "2" bigint, "3" bigint, "4" bigint, "5" bigint)`,
+       ) as ct("diagnosis" int, "AS" bigint, "HY" bigint, "KR" bigint, "SE" bigint)
+  `,
     SPYS : `SELECT * FROM crosstab ( 
       'SELECT EXTRACT(year from upload) as year , hospital, count(slideid) AS count
       FROM slides
       GROUP BY EXTRACT(year from upload), hospital
        ORDER BY 1, 2'
-       ) as ct("year" double precision, "AS" bigint, "HY" bigint, "KR" bigint, "SE" bigint)`
-  }
+       ) as ct("year" double precision, "AS" bigint, "HY" bigint, "KR" bigint, "SE" bigint)`,
+    SPHS : `SELECT * FROM crosstab ( 
+      'SELECT  hospital, diagnosis ,count(slideid) AS count
+      FROM slides
+      GROUP BY  hospital, diagnosis
+       ORDER BY 1, 2'
+       ) as ct("hospital" varchar(255), "G1" bigint, "G2" bigint, "G3" bigint, "G4" bigint, "G5" bigint)`
+  };
+  
 
   conn.query(sql[type]).then(
     re => { res.json(re.rows) }

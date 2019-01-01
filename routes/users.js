@@ -9,6 +9,11 @@ router.get('/', function(req, res, next) {
   res.send('Hello');
 });
 
+router.get('/logout', function(req, res, next){
+  delete req.session.userid;
+  delete req.session.name;
+  res.json({ logout : true });
+})
 
 router.post('/login', (req, res, next)=>{ 
   var id = req.body.id;
