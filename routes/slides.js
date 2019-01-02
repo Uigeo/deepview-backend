@@ -56,14 +56,14 @@ router.get('/chart/:type', (req, res, next)=>{
   console.log(type);
   const sql = {
     SPY : "SELECT EXTRACT('YEAR' from upload) as year, count(slideid) FROM slides GROUP BY EXTRACT('YEAR' from upload) ORDER BY 1 ",
-    SPD : "SELECT diagnosis, count(slideid) FROM slides GROUP BY diagnosis ORDER BY diagnosis",
+    SPD : "SELECT diagnosis::text as name, count(slideid)::integer as value FROM slides GROUP BY diagnosis ORDER BY diagnosis",
     SPH : "SELECT hospital as name, count(slideid)::integer as value FROM slides GROUP BY hospital ORDER BY hospital",
     SPDS : `SELECT * FROM crosstab ( 
-      'SELECT diagnosis, hospital ,count(slideid) AS count
+      'SELECT diagnosis::text, hospital ,count(slideid) AS count
       FROM slides
       GROUP BY diagnosis, hospital
        ORDER BY 1, 2'
-       ) as ct("diagnosis" int, "AS" bigint, "HY" bigint, "KR" bigint, "SE" bigint)
+       ) as ct("diagnosis" text, "AS" bigint, "HY" bigint, "KR" bigint, "SE" bigint)
   `,
     SPYS : `SELECT * FROM crosstab ( 
       'SELECT EXTRACT(year from upload) as year , hospital, count(slideid) AS count
@@ -91,8 +91,8 @@ router.get('/chart/:type', (req, res, next)=>{
 });
 
 //"\'%"+ req.params.keyword + "%\'"
-router.get('/search/:pivot/:keyword/:limit', (req, res, next)=>{
-  const text = "SELECT * FROM slides WHERE "+ req.params.pivot +" LIKE '%"+ req.params.keyword +"%' LIMIT "+ req.params.limit;
+router.get('/search/:pivot/:keyword/:limit/:offset', (req, res, next)=>{
+  const text = "SELECT * FROM slides WHERE "+ req.params.pivot +" LIKE '%"+ req.params.keyword +"%' LIMIT "+ req.params.limit + ' OFFSET ' + req.params.offset;
   conn.query(text, (err, response)=>{
     if(err){
       console.log(err);
