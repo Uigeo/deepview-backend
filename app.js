@@ -16,15 +16,16 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
+app.set('trust proxy', true);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(session({
-  secret: '12sdfwerwersdfserwerwef', //keboard cat (랜덤한 값)
+  secret: '12sdfwerwersdfserwerwef',
 	resave: false,
   saveUninitialized: true,
+  proxy: true,
   cookie: { 
-    secure: false,
+    secure: true,
     maxAge: 60000
   },
 

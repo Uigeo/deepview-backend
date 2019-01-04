@@ -91,7 +91,7 @@ conn.query(sql[type]).then(
 
 //"\'%"+ req.params.keyword + "%\'"
 router.get('/search/:pivot/:keyword/:limit/:offset', (req, res, next)=>{
-  const text = "SELECT slide AS slideid, hospital, upload, diagnosis, stain, imgpath FROM slides FROM slides WHERE "+ req.params.pivot +" LIKE '%"+ req.params.keyword +"%' LIMIT "+ req.params.limit + ' OFFSET ' + req.params.offset;
+  const text = "SELECT slide, hospital, upload, diagnosis, stain, imgpath FROM slides WHERE "+ req.params.pivot +" LIKE '%"+ req.params.keyword +"%' LIMIT "+ req.params.limit + ' OFFSET ' + req.params.offset;
   conn.query(text, (err, response)=>{
     if(err){
       console.log(err);
