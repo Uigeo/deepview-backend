@@ -2,12 +2,6 @@ var express = require('express');
 var router = express.Router();
 var conn = require('../dbcon');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  console.log(req.params);
-  res.cookie('sssss', 'ddfdfdfdfdfdf123124');
-  res.send('Hello');
-});
 
 router.get('/logout', function(req, res, next){
   delete req.session.userid;
@@ -18,34 +12,35 @@ router.get('/logout', function(req, res, next){
 router.post('/login', (req, res, next)=>{ 
   var id = req.body.id;
   var pw = req.body.pw;
+  console.log(req.session.wrong);
+  req.session.wrong = (req.session.wrong) ? req.session.wrong+1 : 1 ;
   var sql = `SELECT * FROM users WHERE userid=$1 AND password=$2;`;
   conn.query(sql, [id, pw], (err, users, fields)=>{
       if(err){
           console.log("error___");
           console.error('error connecting: ' + err.stack);
           return;
+      }
+      else if(req.session.wrong >= 5){
+          console.log("5 wrongs!!");
       } 
       else if (users.rows.length > 0) {
           console.log("login successful");
           
           req.session.userid = users.rows[0].userid;
           req.session.name = users.rows[0].name;
-          console.log(req.session.id);
-          res.cookie( 'sid' ,req.session.id);
-          
-      }else{
-          console.log("login fail");
+          req.session.wrong = 0;
+          res.json({ user : users.rows[0] });
       }
-      res.json({ users : users.rows });
+      else{
+          console.log("login fail", req.session.wrong);
+          
+          res.json({ user : null, wrong : req.session.wrong });
+      }
+      
   });
 });
 
 
-router.get('/logout', function (req, res) {
-  delete req.session.userid;
-  delete req.session.name;
-  
-  res.cookie('sid', null);
-});
 
 module.exports = router;

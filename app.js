@@ -20,9 +20,14 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(session({
-  secret: '1234DSFs@adf1234!@#$asd',
-  resave: false,
-  saveUninitialized: true
+  secret: '12sdfwerwersdfserwerwef', //keboard cat (랜덤한 값)
+	resave: false,
+  saveUninitialized: true,
+  cookie: { 
+    secure: false,
+    maxAge: 60000
+  },
+
 }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

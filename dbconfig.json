@@ -2,7 +2,7 @@
 {
     "user": "postgres",
     "host": "localhost",
-    "database": "deepview",
+    "database": "deep",
     "password": "deep1008",
     "port": 5432
 }

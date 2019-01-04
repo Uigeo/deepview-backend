@@ -3,9 +3,8 @@ var router = express.Router();
 var conn = require('../dbcon');
 
 
-/* GET users listing. */
 router.get('/get/:limit', function(req, res, next) {
-  let sql = 'SELECT * FROM slides LIMIT $1';
+  let sql = 'SELECT slide AS slideid, hospital, upload, diagnosis, stain, imgpath FROM slides LIMIT $1';
   conn.query( sql, [req.params.limit], (err, re)=>{
     if(err){
       console.log(err);
@@ -16,7 +15,7 @@ router.get('/get/:limit', function(req, res, next) {
 });
 
 router.get('/get/:limit/:offset', function(req, res, next) {
-  let sql = 'SELECT * FROM slides LIMIT $1 OFFSET $2';
+  let sql = 'SELECT slide AS slideid, hospital, upload, diagnosis, stain, imgpath FROM slides FROM slides LIMIT $1 OFFSET $2';
   conn.query( sql, [req.params.limit, req.params.offset] , (err, re)=>{
     if(err){
       console.log(err);
@@ -26,18 +25,16 @@ router.get('/get/:limit/:offset', function(req, res, next) {
   });
 });
 
-router.get('/get/:limit/:offset/:orderby/:range', function(req, res, next) {
-  const {orderby, range, limit, offset} = req.params;
+router.get('/get/:limit/:offset/:orderby/:order', function(req, res, next) {
+  const {orderby, order, limit, offset} = req.params;
   const query = {
     name: 'get_slide_orderby',
-    text: 'SELECT * FROM slides ORDER BY '+ orderby + ' ' + range +' OFFSET ' + offset  + ' LIMIT ' + limit,
+    text: 'SELECT * FROM slides ORDER BY '+ orderby + ' ' + order +' OFFSET ' + offset  + ' LIMIT ' + limit,
     values: [ ]
   }
-  console.log(query);
   conn.query( query.text)
-    .then( re => { console.log(re.rows) ;res.json(re.rows);} )
+    .then( re => {res.json(re.rows);} )
     .catch(e => console.error(e.stack) ); 
-
   
 });
 
@@ -55,32 +52,34 @@ router.get('/chart/:type', (req, res, next)=>{
   const { type } = req.params;
   console.log(type);
   const sql = {
-    SPY : "SELECT EXTRACT('YEAR' from upload) as year, count(slideid) FROM slides GROUP BY EXTRACT('YEAR' from upload) ORDER BY 1 ",
-    SPD : "SELECT diagnosis::text as name, count(slideid)::integer as value FROM slides GROUP BY diagnosis ORDER BY diagnosis",
-    SPH : "SELECT hospital as name, count(slideid)::integer as value FROM slides GROUP BY hospital ORDER BY hospital",
+    SPY : "SELECT EXTRACT('YEAR' from upload) as year, count(slide) FROM slides GROUP BY EXTRACT('YEAR' from upload) ORDER BY 1 ",
+    SPD : "SELECT diagnosis::text as name, count(slide)::integer as value FROM slides GROUP BY diagnosis ORDER BY diagnosis",
+    SPH : "SELECT hospital as name, count(slide)::integer as value FROM slides GROUP BY hospital ORDER BY hospital",
     SPDS : `SELECT * FROM crosstab ( 
-      'SELECT diagnosis::text, hospital ,count(slideid) AS count
+      'SELECT diagnosis::text, hospital ,count(slide) AS count
       FROM slides
       GROUP BY diagnosis, hospital
        ORDER BY 1, 2'
-       ) as ct("diagnosis" text, "AS" bigint, "HY" bigint, "KR" bigint, "SE" bigint)
+       ) as ct("diagnosis" text, "HYUMC" bigint, "KBSMC" bigint, "KUMC" bigint, "SMC" bigint)
   `,
     SPYS : `SELECT * FROM crosstab ( 
-      'SELECT EXTRACT(year from upload) as year , hospital, count(slideid) AS count
-      FROM slides
-      GROUP BY EXTRACT(year from upload), hospital
-       ORDER BY 1, 2'
-       ) as ct("year" double precision, "AS" bigint, "HY" bigint, "KR" bigint, "SE" bigint)`,
+      'select  y.year, h.hospital, count(t.slide) 
+      from (select distinct hospital from slides) h cross join
+           (select distinct EXTRACT(year from upload) as year from slides) y left join
+            slides t
+        on t.hospital = h.hospital and EXTRACT(year from t.upload) = y.year GROUP BY y.year, h.hospital ORDER BY 1, 2;'
+       ) as ct("year" double precision, "HYUMC" bigint, "KBSMC" bigint, "KUMC" bigint, "SMC" bigint);`,
     SPHS : `SELECT * FROM crosstab ( 
-      'SELECT  hospital, diagnosis ,count(slideid) AS count
-      FROM slides
-      GROUP BY  hospital, diagnosis
-       ORDER BY 1, 2'
-       ) as ct("hospital" varchar(255), "G1" bigint, "G2" bigint, "G3" bigint, "G4" bigint, "G5" bigint)`
+      'select h.hospital, y.year, count(t.slide) 
+      from (select distinct hospital from slides) h cross join
+           (select distinct EXTRACT(year from upload) as year from slides) y left join
+            slides t
+        on t.hospital = h.hospital and EXTRACT(year from t.upload) = y.year GROUP BY h.hospital, y.year ORDER BY 1, 2;'
+       ) as ct("hospital" varchar(255), "2016" bigint, "2017" bigint, "2018" bigint);`
   };
   
 
-  conn.query(sql[type]).then(
+conn.query(sql[type]).then(
     re => { res.json(re.rows) }
   )
   .catch(
@@ -92,7 +91,7 @@ router.get('/chart/:type', (req, res, next)=>{
 
 //"\'%"+ req.params.keyword + "%\'"
 router.get('/search/:pivot/:keyword/:limit/:offset', (req, res, next)=>{
-  const text = "SELECT * FROM slides WHERE "+ req.params.pivot +" LIKE '%"+ req.params.keyword +"%' LIMIT "+ req.params.limit + ' OFFSET ' + req.params.offset;
+  const text = "SELECT slide AS slideid, hospital, upload, diagnosis, stain, imgpath FROM slides FROM slides WHERE "+ req.params.pivot +" LIKE '%"+ req.params.keyword +"%' LIMIT "+ req.params.limit + ' OFFSET ' + req.params.offset;
   conn.query(text, (err, response)=>{
     if(err){
       console.log(err);
