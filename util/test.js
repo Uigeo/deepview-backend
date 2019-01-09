@@ -4,8 +4,8 @@ const fs = require('fs');
 //CMU-1-Small-Region.svs
 //SMC-008-00183-16-400-017.svs
 
-var filename = '/home/hello/Desktop/CMU-1-Small-Region.svs';
-var outputname = '/home/hello/Desktop/uo.zip';
+var filename = '/home/hello/Desktop/SMC-008-00183-16-400-017.svs';
+var outputname = '/home/hello/Desktop/test2.zip';
 
 const readStream = fs.createReadStream(filename);
 const writeStream = fs.createWriteStream(outputname);
@@ -20,12 +20,12 @@ sharp(filename).metadata().then(
 //     err => {console.log(err)}
 // );
 
-sharp(filename).limitInputPixels(false).jpeg().tile({
+sharp(filename).limitInputPixels(false).tile({
     size : 128,
     container : 'zip',
     layout : 'zoomify'
-}).toFile(outputname).then().catch(
-    err=>{console.log(err)}
+}).toFile(outputname).then(
+    info => console.log(info)
 );
 
 

@@ -21,7 +21,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(session({
   secret: '12sdfwerwersdfserwerwef',
-	resave: false,
+	resave: true,
   saveUninitialized: true,
   proxy: true,
   cookie: { 
@@ -33,7 +33,11 @@ app.use(session({
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
+app.use(cors({
+  origin : ['http://localhost:3000'],
+  methods : ['GET', 'POST'],
+  credentials : true
+}));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
