@@ -39,13 +39,13 @@ console.log(3);
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({
-  origin : ['http://localhost:3000'],
-  methods : ['GET', 'POST'],
-  credentials : true
-}));
+app.use(cors());
 
-
+// {
+//   origin : ['http://localhost:3000'],
+//   methods : ['GET', 'POST'],
+//   credentials : true
+// }
 
 console.log(4);
 app.use('/', indexRouter);
