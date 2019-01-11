@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
 
-console.log(1);
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -14,7 +14,7 @@ var session = require('express-session');
 
 var app = express();
 
-console.log(2);
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -34,7 +34,12 @@ app.use(session({
 
 }));
 
-console.log(3);
+
+app.use('/*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
+});
 
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -47,13 +52,11 @@ app.use(cors());
 //   credentials : true
 // }
 
-console.log(4);
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/slides', slidesRouter);
 
 
-console.log(5);
 
 
 // catch 404 and forward to error handler
@@ -73,16 +76,10 @@ app.use(function(err, req, res, next) {
 });
 
 
-console.log(6);
-
 app.get('*', function (request, response){
   response.sendFile(path.resolve(__dirname, 'public', 'index.html'))
 });
 
-app.all('/*', function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  next();
-});
+
 
 module.exports = app;
